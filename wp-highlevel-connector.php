@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name:     HighLevel Connector
- * Plugin URI:      PLUGIN SITE HERE
+ * Plugin Name:     WordPress HighLevel Connector
+ * Plugin URI:      https://github.com/mwender/wp-highlevel-connector
  * Description:     Provides various connections between WordPress and HighLevel CRM
  * Author:          Michael Wender
  * Author URI:      https://mwender.com
  * Text Domain:     highlevel-connector
  * Domain Path:     /languages
- * Version:         1.0.0
+ * Version:         1.0.1
  *
  * @package         Highlevel_Connector
  */
