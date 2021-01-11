@@ -33,15 +33,28 @@ function send_attendee_to_highlevel( $attendee_id, $post_id, $order, $product_id
   $contact['email'] = get_post_meta( $attendee_id, '_tribe_tickets_email', true );
   $contact['tags'] = $tag_string;
   $meta = get_post_meta( $attendee_id, '_tribe_tickets_meta', true );
+  uber_log('🔔 $meta = ' . print_r( $meta, true ) );
   if( $meta && is_array( $meta ) ){
     foreach ($meta as $key => $value) {
       $contact[$$key] = $value;
     }
   }
+  uber_log('🔔 $contact = ' . print_r( $contact, true ) );
+
+  if( ! isset( $contact['phone'] ) ){
+    // `_tribe_tickets_meta` hasn't been saved yet so
+    // we'll add this contact to our delayed
+    // processing queue to be sent over momentarily
+    // once the additional meta data has been saved.
+    $data = [
+      'attendee_id' => $attendee_id,
+      'contact'     => $contact,
+    ];
+  }
 
   // Send attendee to HighLevel
-  $response = post_ghl_contact( $contact );
-  uber_log('🔔 $response = ' . print_r( $response, true ) );
+  //$response = post_ghl_contact( $contact );
+  //uber_log('🔔 $response = ' . print_r( $response, true ) );
 }
 add_action('event_ticket_woo_attendee_created', __NAMESPACE__ . '\\send_attendee_to_highlevel', 10, 4 );
 
