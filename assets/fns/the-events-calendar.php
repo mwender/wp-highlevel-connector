@@ -1,6 +1,6 @@
 <?php
 
-namespace HLC\theEventsCalendar;
+namespace WPHLC\theEventsCalendar;
 
 /**
  * Sends an attendee to the HighLevel API.
@@ -46,6 +46,8 @@ function send_attendee_to_highlevel( $attendee_id, $post_id, $order, $product_id
     // we'll add this contact to our delayed
     // processing queue to be sent over momentarily
     // once the additional meta data has been saved.
+    // REMOVE Action Scheduler (see https://actionscheduler.org/usage/)
+    // USE: https://github.com/deliciousbrains/wp-background-processing
     $data = [
       'attendee_id' => $attendee_id,
       'contact'     => $contact,
