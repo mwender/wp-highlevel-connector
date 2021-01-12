@@ -3,18 +3,13 @@
 namespace WPHLC\theEventsCalendar;
 
 /**
- * Sends an attendee to the HighLevel API.
+ * Builds a string of tags assigned to the Event/Product.
  *
- * @param      int  $attendee_id  The attendee identifier
- * @param      int  $post_id      The post identifier
- * @param      int  $order        The order
- * @param      int  $product_id   The product identifier
+ * @param      int  $product_id  The product identifier
+ *
+ * @return     string  The order tags.
  */
-function send_attendee_to_highlevel( $attendee_id, $post_id, $order, $product_id ){
-  $attendee = get_post( $attendee_id );
-  $product = wc_get_product( $product_id );
-
-  // Build string of tags associated with this product
+function get_order_tags( $product_id ){
   $tribe_event_id = get_post_meta( $product_id, '_tribe_wooticket_for_event', true );
   $terms = get_the_terms( $tribe_event_id, 'post_tag' );
   $tag_array = [];
@@ -26,39 +21,32 @@ function send_attendee_to_highlevel( $attendee_id, $post_id, $order, $product_id
     $tag_string = implode( ',', $tag_array );
   }
 
-  // Build our contact
-  // TODO: Get the contact's phone number:
-  $contact = [];
-  $contact['name'] = get_post_meta( $attendee_id, '_tribe_tickets_full_name', true );
-  $contact['email'] = get_post_meta( $attendee_id, '_tribe_tickets_email', true );
-  $contact['tags'] = $tag_string;
-  $meta = get_post_meta( $attendee_id, '_tribe_tickets_meta', true );
-  uber_log('🔔 $meta = ' . print_r( $meta, true ) );
-  if( $meta && is_array( $meta ) ){
-    foreach ($meta as $key => $value) {
-      $contact[$$key] = $value;
-    }
-  }
-  uber_log('🔔 $contact = ' . print_r( $contact, true ) );
-
-  if( ! isset( $contact['phone'] ) ){
-    // `_tribe_tickets_meta` hasn't been saved yet so
-    // we'll add this contact to our delayed
-    // processing queue to be sent over momentarily
-    // once the additional meta data has been saved.
-    // REMOVE Action Scheduler (see https://actionscheduler.org/usage/)
-    // USE: https://github.com/deliciousbrains/wp-background-processing
-    $data = [
-      'attendee_id' => $attendee_id,
-      'contact'     => $contact,
-    ];
-  }
-
-  // Send attendee to HighLevel
-  //$response = post_ghl_contact( $contact );
-  //uber_log('🔔 $response = ' . print_r( $response, true ) );
+  return $tag_string;
 }
-add_action('event_ticket_woo_attendee_created', __NAMESPACE__ . '\\send_attendee_to_highlevel', 10, 4 );
+
+/**
+ * Grabs all Attendees for an event and sends their info to HighLevel.
+ *
+ * Hooks to `event_tickets_woo_complete_order`.
+ *
+ * @param      int  $order_id  The order ID.
+ */
+function order_complete( $order_id ){
+  $attendees = tribe_tickets_get_attendees( $order_id );
+
+  foreach( $attendees as $attendee ){
+    $contact = [
+      'name'  => $attendee['holder_name'],
+      'email' => $attendee['holder_email'],
+      'tags'  => get_order_tags( $attendee['product_id'] ),
+      'phone' => $attendee['attendee_meta']['phone']['value'],
+    ];
+
+    // Send attendee to HighLevel
+    $response = post_ghl_contact( $contact );
+  }
+}
+add_action( 'event_tickets_woo_complete_order', __NAMESPACE__ . '\\order_complete' );
 
 /**
  * Posts a Contact to the HighLevel API.

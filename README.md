@@ -4,7 +4,7 @@
 **Requires at least:** 4.5  
 **Tested up to:** 5.6  
 **Requires PHP:** 5.6  
-**Stable tag:** 1.0.1  
+**Stable tag:** 1.1.0  
 **License:** GPLv2 or later  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -19,6 +19,9 @@ This plugin provides various connections between WordPress and the [HighLevel AP
 Send attendees for The Events Calendar events to HighLevel as *Contacts*.
 
 ## Changelog ##
+
+### 1.1.0 ###
+* Refactoring The Events Calendar attendees to HighLevel connection to hook to `event_tickets_woo_complete_order`.
 
 ### 1.0.1 ###
 * Updating plugin name from "HighLevel Connector" to "WordPress HighLevel Connector".
